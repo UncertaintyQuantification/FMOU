@@ -17,4 +17,4 @@ The repository contains eight folders:
 
 7.`Experiment5` - Code for Experiment 5.
 
-8.`slip_propagation_Cascadia` - Code for modeling the slip propagation in Cascade. 
+8.`slip_propagation_Cascadia` - Code for modeling the slip propagation in Cascadia. 
