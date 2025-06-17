@@ -3,18 +3,19 @@ Code for Data inversion for high-dimensional dynamical systems from noisy measur
 
 The repository contains eight folders:
 
-1.`functions`- Required functions for running the codes.
 
-2.`real_data` - Data for Experiment 5 and slip propagation study, obtained from https://www.jacksoncrustaldef.com/software.html.
+1.`Experiment1` - Code for Experiment 1.
 
-3.`Experiment1` - Code for Experiment 1.
+2.`Experiment2` - Code for Experiment 2.
 
-4.`Experiment2` - Code for Experiment 2.
+3.`Experiment3` - Code for Experiment 3.
 
-5.`Experiment3` - Code for Experiment 3.
+4.`Experiment4` - Code for Experiment 4.
 
-6.`Experiment4` - Code for Experiment 4.
+5.`Experiment5` - Code for Experiment 5.
 
-7.`Experiment5` - Code for Experiment 5.
+6.`functions`- Required functions for running the codes.
+
+7.`real_data` - Data for Experiment 5 and slip propagation study, obtained from https://www.jacksoncrustaldef.com/software.html.
 
 8.`slip_propagation_Cascadia` - Code for modeling the slip propagation in Cascadia. 
