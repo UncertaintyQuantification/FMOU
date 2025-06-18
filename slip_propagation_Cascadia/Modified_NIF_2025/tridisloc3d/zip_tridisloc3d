@@ -1,0 +1,7 @@
+dr='tridisloc3d0.1';
+mkdir $dr;
+
+cp tridisloc3d.c poly3d_tridisloc3d.c matrixpoly3d1.c safetan.c infcoeff.c \
+infcoeff.h matrixpoly3d.h safetan.h tritest.m README.txt zip_tridisloc3d $dr/;
+
+zip $dr.zip $dr/*
