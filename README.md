@@ -16,10 +16,7 @@ The repository contains eight folders:
 
 6.`functions`- Required functions for running the codes.
 
-7.`real_data` - Data for Experiment 5 and slip propagation study, obtained from [Dr. Noel M. Jackson's group](https://example.com](https://www.jacksoncrustaldef.com/software.html). 
+7.`real_data` - Data for Experiment 5 and slip propagation study, obtained from [Dr. Noel M. Jackson's group](https://www.jacksoncrustaldef.com/software.html). 
 
 8.`slip_propagation_Cascadia` - Code for modeling the slip propagation in Cascadia. The code for modified NIF is from [Dr. Noel M. Jackson's group](https://www.jacksoncrustaldef.com/software.html).
 
-
-
-[1] https://www.jacksoncrustaldef.com/software.html.
