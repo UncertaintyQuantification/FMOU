@@ -3,6 +3,7 @@ library(plot3D)
 library(MASS)
 library(FastGaSP)
 library(RobustGaSP)
+library(pracma)
 
 # functions used for NIF and FMOU
 source('../functions/FMOU.R')
@@ -155,7 +156,7 @@ while(left <= right){
 Nbasis_EM  = mid
 time2 = Sys.time()
 time_FMOU_select_d = time2 - time1
-time_FMOU_select_d # 3.564413 secs
+time_FMOU_select_d 
 
 
 
@@ -225,74 +226,82 @@ NIF_signal = G_NIF %*% c_NIF
 time2 = Sys.time()
 NIF_time = time2-time1
 NIF_time
-#time2 - time1 # 1560.47 seconds
+#time2 - time1 
+
+rm(sigma_kgk)
+rm(sigma_kgn)
+rm(GF_ori)
+rm(res)
+rm(NIF_backward)
+rm(NIF_forward)
+save.image(file="FMOU_real_data.RData")
 
 
 ################## Let's use the original NIF with reduced dimension ########################
-time1 = Sys.time()
-Nbasis = Nbasis_EM
-statedim = 3*Nbasis # dimension of latent states for Kalman Filter
-G_NIF = matrix(U%*%diag(Lambda)[,1:Nbasis], ncol=Nbasis)
-theta_1 =  logspace(2, 4, 5)
-theta_2 = c(0.5, 1, 1.5, 2)
-loglik_theta_combination = matrix(NA, length(theta_1), length(theta_2))
-for(i1 in 1:length(theta_1)){
-  for(i2 in 1:length(theta_2)){
-    param_here = c(theta_1[i1], theta_2[i2])
-    loglik_theta_combination[i1, i2] = neg_loglik_fix_noise(param_here, t=doy, Data=output, G_NIF, Lambda, avg_obs_uncertainty)
-  }
-}
-optim_loglik_index = which.min(loglik_theta_combination)
-theta_2_index = ceiling(optim_loglik_index / length(theta_1))
-theta_1_index = optim_loglik_index - (theta_2_index - 1)*length(theta_1)
-theta_hat = theta_1[theta_1_index]
-theta2_hat = theta_2[theta_2_index]
-
-
-tau = 0
-res = netloglik3p(t=doy, Data=output, G_NIF, Lambda, theta_hat, theta2_hat)
-sig2_hat = avg_obs_uncertainty
-alpha_hat = sqrt(sig2_hat)*theta_hat
-gamma_hat = sqrt(sig2_hat)*theta2_hat
-
-# construct the initial states
-x0 = matrix(0, statedim, 1)
-var0 = 1.0^(-8)*Lambda[1]*diag(statedim)
-for(j in 1:Nbasis)
-{var0[(3*(j-1)+1),(3*(j-1)+1)] = gamma_hat^2 *Lambda[j]}
-
-# Run Filter
-res_select_d =  netfilt(t=doy, Data=output, G=matrix(G_NIF[,1:Nbasis], ncol=Nbasis), sigmas=c(tau, sqrt(sig2_hat), alpha_hat), x0, var0, 1)
-x_kgk_select_d = res_select_d[[1]];  sigma_kgk_select_d = res_select_d[[2]]
-x_kgn_select_d = res_select_d[[3]]; sigma_kgn_select_d = res_select_d[[4]]
-
-c_NIF_select_d = matrix(0,Nbasis, length(doy))  # matrix of stochastic coefficients
-Ts_select_d = matrix(0, Nbasis, 3*Nbasis)  # we can think it's "G" in KF 
-
-for(h in 1:length(doy))
-  for(i in 1:Nbasis)
-  { Ts_select_d[i,(3*(i-1)+1):(3*(i-1)+3)] = c(doy[h]-doy[1],1,0) 
-  c_NIF_select_d[,h] = Ts_select_d%*%(x_kgn_select_d[h,])
-  }
-NIF_slip_select_d = matrix(t(Psi[1:Nbasis,]), ncol=Nbasis)%*%c_NIF_select_d  # estimated slips
-NIF_signal_select_d = G_NIF %*% c_NIF_select_d  
-time2 = Sys.time()
-time2 - time1 # 89.1813 seconds
+# time1 = Sys.time()
+# Nbasis = Nbasis_EM
+# statedim = 3*Nbasis # dimension of latent states for Kalman Filter
+# G_NIF = matrix(U%*%diag(Lambda)[,1:Nbasis], ncol=Nbasis)
+# theta_1 =  logspace(2, 4, 5)
+# theta_2 = c(0.5, 1, 1.5, 2)
+# loglik_theta_combination = matrix(NA, length(theta_1), length(theta_2))
+# for(i1 in 1:length(theta_1)){
+#   for(i2 in 1:length(theta_2)){
+#     param_here = c(theta_1[i1], theta_2[i2])
+#     loglik_theta_combination[i1, i2] = neg_loglik_fix_noise(param_here, t=doy, Data=output, G_NIF, Lambda, avg_obs_uncertainty)
+#   }
+# }
+# optim_loglik_index = which.min(loglik_theta_combination)
+# theta_2_index = ceiling(optim_loglik_index / length(theta_1))
+# theta_1_index = optim_loglik_index - (theta_2_index - 1)*length(theta_1)
+# theta_hat = theta_1[theta_1_index]
+# theta2_hat = theta_2[theta_2_index]
+# 
+# 
+# tau = 0
+# res = netloglik3p(t=doy, Data=output, G_NIF, Lambda, theta_hat, theta2_hat)
+# sig2_hat = avg_obs_uncertainty
+# alpha_hat = sqrt(sig2_hat)*theta_hat
+# gamma_hat = sqrt(sig2_hat)*theta2_hat
+# 
+# # construct the initial states
+# x0 = matrix(0, statedim, 1)
+# var0 = 1.0^(-8)*Lambda[1]*diag(statedim)
+# for(j in 1:Nbasis)
+# {var0[(3*(j-1)+1),(3*(j-1)+1)] = gamma_hat^2 *Lambda[j]}
+# 
+# # Run Filter
+# res_select_d =  netfilt(t=doy, Data=output, G=matrix(G_NIF[,1:Nbasis], ncol=Nbasis), sigmas=c(tau, sqrt(sig2_hat), alpha_hat), x0, var0, 1)
+# x_kgk_select_d = res_select_d[[1]];  sigma_kgk_select_d = res_select_d[[2]]
+# x_kgn_select_d = res_select_d[[3]]; sigma_kgn_select_d = res_select_d[[4]]
+# 
+# c_NIF_select_d = matrix(0,Nbasis, length(doy))  # matrix of stochastic coefficients
+# Ts_select_d = matrix(0, Nbasis, 3*Nbasis)  # we can think it's "G" in KF 
+# 
+# for(h in 1:length(doy))
+#   for(i in 1:Nbasis)
+#   { Ts_select_d[i,(3*(i-1)+1):(3*(i-1)+3)] = c(doy[h]-doy[1],1,0) 
+#   c_NIF_select_d[,h] = Ts_select_d%*%(x_kgn_select_d[h,])
+#   }
+# NIF_slip_select_d = matrix(t(Psi[1:Nbasis,]), ncol=Nbasis)%*%c_NIF_select_d  # estimated slips
+# NIF_signal_select_d = G_NIF %*% c_NIF_select_d  
+# time2 = Sys.time()
+# time2 - time1 # 89.1813 seconds
 
 
 ######################################################################
 
-raw_obs_drop_up = obs[c(mapply(c, 3*observed_location-2, 3*observed_location-1)), ]
+#raw_obs_drop_up = obs[c(mapply(c, 3*observed_location-2, 3*observed_location-1)), ]
 # compare RMSE of fitting data
-sqrt(mean((raw_obs_drop_up - (NIF_signal + obs_cleaned[,1]))^2, na.rm=T)) # NIF
-sqrt(mean((raw_obs_drop_up - (NIF_signal_select_d + obs_cleaned[,1]))^2, na.rm=T)) # NIF selected d
-sqrt(mean((raw_obs_drop_up - (fit_latent_state_EM + obs_cleaned[,1]))^2, na.rm=T)) # FMOU
+#sqrt(mean((raw_obs_drop_up - (NIF_signal + obs_cleaned[,1]))^2, na.rm=T)) # NIF
+#sqrt(mean((raw_obs_drop_up - (NIF_signal_select_d + obs_cleaned[,1]))^2, na.rm=T)) # NIF selected d
+#sqrt(mean((raw_obs_drop_up - (fit_latent_state_EM + obs_cleaned[,1]))^2, na.rm=T)) # FMOU
 # percentage of negative slips
-sum(NIF_slip < 0) / (1978*88) # NIF
-sum(NIF_slip_select_d < 0) / (1978*88) # NIF
-sum(Sp_latent_state_EM[1:1978,] < 0) / (1978*88) # FMOU
+#sum(NIF_slip < 0) / (1978*88) # NIF
+#sum(NIF_slip_select_d < 0) / (1978*88) # NIF
+#sum(Sp_latent_state_EM[1:1978,] < 0) / (1978*88) # FMOU
 
-save.image(file="FMOU_real_data.RData")
+
 
 # ### output slip rates
 # slip_rate_FMOU = matrix(0, nrow=1978, ncol = 88)
@@ -308,8 +317,6 @@ save.image(file="FMOU_real_data.RData")
 # slip_rate_NIF[slip_rate_NIF<0] = 0
 # slip_rate_NIF_select_d[slip_rate_NIF_select_d<0] = 0
 # 
-
-#### these files are needed for Figure7.R, Figure8.R and Figure9.m
 # write.csv(Sp_latent_state_EM[1:1978, ], "saved_data/slip_FMOU_large_mesh.csv", row.names=FALSE)
 # write.csv(NIF_slip[1:1978, ], "saved_data/slip_NIF_large_mesh.csv", row.names=FALSE)
 # write.csv(NIF_slip_select_d[1:1978, ], "saved_data/slip_NIF_large_mesh_select_d.csv", row.names=FALSE)
